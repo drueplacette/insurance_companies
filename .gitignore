@@ -7,3 +7,6 @@
 # Ignore Python-generated files
 *.pyc
 *.pyd
+
+# Ignore generated databases
+db/*.sqlite
