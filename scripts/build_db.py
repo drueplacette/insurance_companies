@@ -1,6 +1,8 @@
-'''A script that takes an excel-generated CSV file of insurance companies and possible queries and writes it to an SQLite Database'''
+'''
+Takes an excel-generated CSV file of insurance companies 
+and possible search queries and writes it to an SQLite Database
+'''
 from sys import argv
-from itertools import islice
 import csv, sqlite3
 
 def main(csv_in, sqlite_out):
