@@ -10,5 +10,6 @@ field1 text,
 field2 text,
 field3 text,
 field4 text,
-field5 text
+field5 text,
+field6 text
 );
