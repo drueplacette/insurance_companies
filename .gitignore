@@ -1,0 +1,9 @@
+# Ignore Vim swapfiles
+*.swp
+
+# Ignore generated CSVs
+*.csv
+
+# Ignore Python-generated files
+*.pyc
+*.pyd
