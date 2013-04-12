@@ -1,9 +1,10 @@
+'''A script that takes an excel-generated CSV file of insurance companies and possible queries and writes it to an SQLite Database'''
 from sys import argv
 from itertools import islice
 import csv, sqlite3
 
 def main(csv_in, sqlite_out):
-    '''A line at a time, iterate over a CSV file, reading each line into the database'''
+    '''Iterates over a CSV file, parsing each line and inserting it into the database'''
     for record in csv_parselines(csv_in):
         db_insert_records(record)
         print record
@@ -29,11 +30,6 @@ def parse_records(row):
 def db_insert_records(parsed_records):
     '''Inserts parsed records into the database'''
     pass
-
-def option_not_empty(numbered_option):
-    if numbered_option[1] == ['']*5:
-        return False
-    return True
 
 if __name__ == '__main__':
     main(csv_in=argv[1], sqlite_out=argv[2]) # Placeholder until proper argparse put in place
