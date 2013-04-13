@@ -17,7 +17,7 @@ def search_options_by_company(company_name):
 
     company_id = _get_company_id(conn, company_name)
     print company_id
-    if company_id == (None,):
+    if company_id is None:
         return {}
 
     search_options = _remove_empty_fields(_get_company_search_options(conn, company_id))
@@ -35,15 +35,14 @@ def _get_company_id(conn, company_name):
     '''Return company id given company name'''
     c = conn.cursor()
     c.execute('SELECT ROWID FROM company WHERE name=?', [company_name])
-    return c.fetchone()
+    return c.fetchone()[0] # Unpack tuple to return bare None or int
 
-def _get_company_search_options(database, company_id):
+def _get_company_search_options(conn, company_id):
     '''Return search options given company id'''
     c = conn.cursor()
-    c.execute('''SELECT (searchoption, field1, field2, field3, field4, field5, field6)
+    c.execute('''SELECT searchoption, field1, field2, field3, field4, field5, field6
                  FROM search
-                 WHERE searchcompany=?''', 
-                 [company_id])
+                 WHERE searchcompany=?''', [company_id])
     return c.fetchall()
 
 def _remove_empty_fields(search_options):
@@ -54,7 +53,7 @@ def _dictify_by_first(search_options):
     '''Convert a flat list of search options into a dict mapping option numbers to their option arguments'''
     search_dict = {}
     for option in search_options:
-        search_dict[option[0]] = option[1:]
+        search_dict[option[0]] = option[1:] # First item of option as key, rest as value list
 
     return search_dict
 
