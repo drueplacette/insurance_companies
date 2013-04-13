@@ -30,7 +30,7 @@ def csv_parselines(filepath):
             yield parse_records(row)
 
 def parse_records(row):
-    '''Takes a flat list and returns a tuple containing the company name and a list of numbered options'''
+    '''Takes a flat list and returns a dictionary containing the company name and a list of numbered options'''
     return {'company':row[0], 'search_options':_parse_search_options(row)}
 
 def db_insert_records(db_conn, parsed_records):
@@ -49,6 +49,7 @@ def db_insert_records(db_conn, parsed_records):
                         [company_id] + search_option)
 
 def _parse_search_options(row):
+    '''Parse the search options for a specific row, returning a list of options (list of lists of fields)'''
     # fallback approach due to uneven field sizes. Messy.
     search_options = [row[2:6], row[8:13]] + [row[(i*6)+14+1:(i*6)+14+6] for i in range(9)]
     # Remove empty fields from options
@@ -63,6 +64,7 @@ def _parse_search_options(row):
     return search_options
 
 def _clear_line():
+    '''Write a carriage return character to stdout'''
     sys.stdout.write("\r")
     sys.stdout.flush()
 
