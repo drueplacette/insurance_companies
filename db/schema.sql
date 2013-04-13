@@ -1,9 +1,9 @@
 CREATE TABLE company (
-id integer PRIMARY_KEY,
+id integer PRIMARY KEY,
 name text
 );
 CREATE TABLE search (
-id integer PRIMARY_KEY,
+id integer PRIMARY KEY,
 searchcompany integer,
 searchoption integer,
 field1 text,
