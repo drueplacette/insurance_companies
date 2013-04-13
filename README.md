@@ -28,6 +28,32 @@ After that, start the api server. The default port is 8080, but you can specify 
 $ python searchoptions_api_server.py -p <port>
 ```
 
+You can also specify hostname and database for the server. Call up its help to view the options for these.
+
+Supported Requests
+------------------
+The API server responds to two types of requests: search options requests and company search requests.
+
+**Search Options**
+The route for these options is `/search/options/<insurance_company_name>`. If no such company exists, an empty JSON object will be returned.
+```bash
+$ curl -l <server_address>/search/options/Aetna+Long+Term+Care
+{"search-options": {"1": ["subscriber_id", "subscriber_last_name", "subscriber_first_name", "subscriber_dob"]}}
+
+$ curl -l <server_address>/search/options/Invalid+Name
+{}
+```
+
+**Company Search**
+The route for searching companies is `/search/companies/<search_string>`. If no companies are found, the "matches" attribute of the returned JSON object will be empty.
+```bash
+$ curl -l <server_address>/search/companies/AARP
+{"matches": ["AARP"]}
+
+$ curl -l <server_address>/search/companies/Invalid+Name
+{"matches": []}
+```
+
 Updating the Database
 ---------------------
 Currently no proper way of doing this is included; for the time being, the only other option is to rebuild the database and then replace the old with the new. Don't re-write onto the old database, as you'll end up with dupicated copies of everything.
@@ -35,7 +61,6 @@ Currently no proper way of doing this is included; for the time being, the only 
 Bundled Scripts
 ---------------
 **scripts/build_db.py**
-
 Takes an excel-generated CSV file of the insurance companies and possible search queries and builds an SQLite database from it.
 
 Usage:
