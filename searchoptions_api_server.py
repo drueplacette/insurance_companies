@@ -8,14 +8,13 @@ parser.add_argument('-o', '--port', help='port to run the server on', type=int)
 parser.add_argument('-d', '--database', help='SQLite database file to use')
 args = parser.parse_args()
 
-@route('/search/options/:company_name')
+@route('/search/options/<company_name>')
 def search_options_by_company(company_name):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
-    
     database = args.database if args.database is not None else 'db/search_database.sqlite'
     conn = sqlite3.connect(database)
 
-    company_id = _get_company_id(conn, company_name)
+    company_id = _get_company_id(conn, _url_decode(company_name))
     print company_id
     if company_id is None:
         return {}
@@ -56,6 +55,10 @@ def _dictify_by_first(search_options):
         search_dict[option[0]] = option[1:] # First item of option as key, rest as value list
 
     return search_dict
+
+def _url_decode(urlencoded):
+    '''Replace the + in urlencoded strings with a space character'''
+    return urlencoded.replace('+', ' ')
 
 if __name__ == '__main__':
     run(host=args.server if args.server is not None else 'localhost',
