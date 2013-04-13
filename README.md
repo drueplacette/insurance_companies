@@ -35,6 +35,7 @@ Supported Requests
 The API server responds to two types of requests: search options requests and company search requests.
 
 **Search Options**
+
 The route for these options is `/search/options/<insurance_company_name>`. If no such company exists, an empty JSON object will be returned.
 ```bash
 $ curl -l <server_address>/search/options/Aetna+Long+Term+Care
@@ -45,6 +46,7 @@ $ curl -l <server_address>/search/options/Invalid+Name
 ```
 
 **Company Search**
+
 The route for searching companies is `/search/companies/<search_string>`. If no companies are found, the "matches" attribute of the returned JSON object will be empty.
 ```bash
 $ curl -l <server_address>/search/companies/AARP
@@ -61,6 +63,7 @@ Currently no proper way of doing this is included; for the time being, the only 
 Bundled Scripts
 ---------------
 **scripts/build_db.py**
+
 Takes an excel-generated CSV file of the insurance companies and possible search queries and builds an SQLite database from it.
 
 Usage:
