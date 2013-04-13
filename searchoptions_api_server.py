@@ -8,7 +8,7 @@ parser.add_argument('-o', '--port', help='port to run the server on', type=int)
 parser.add_argument('-d', '--database', help='SQLite database file to use')
 args = parser.parse_args()
 
-@route('/api/search-options/:company_name')
+@route('/search/options/:company_name')
 def search_options_by_company(company_name):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
     
@@ -27,6 +27,9 @@ def search_options_by_company(company_name):
 
     return {'search-options': search_options}
 
+@route('/search/companies/:search_str')
+def search_companies(search_str):
+    pass
 
 def _get_company_id(conn, company_name):
     '''Return company id given company name'''
