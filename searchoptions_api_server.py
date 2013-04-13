@@ -11,19 +11,17 @@ args = parser.parse_args()
 @route('/search/options/<company_name>')
 def search_options_by_company(company_name):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
+    
     database = args.database if args.database is not None else 'db/search_database.sqlite'
-    conn = sqlite3.connect(database)
+    with SQLiteDatabaseConnection(database) as conn:
+        company_id = _get_company_id(conn, _url_decode(company_name))
+        print company_id
+        if company_id is None:
+            return {}
 
-    company_id = _get_company_id(conn, _url_decode(company_name))
-    print company_id
-    if company_id is None:
-        return {}
+        search_options = _remove_empty_fields(_get_company_search_options(conn, company_id))
 
-    search_options = _remove_empty_fields(_get_company_search_options(conn, company_id))
     search_options = _dictify_by_first([option for option in search_options if option != []])
-
-    conn.close()
-
     return {'search-options': search_options}
 
 @route('/search/companies/:search_str')
@@ -34,7 +32,9 @@ def _get_company_id(conn, company_name):
     '''Return company id given company name'''
     c = conn.cursor()
     c.execute('SELECT ROWID FROM company WHERE name=?', [company_name])
-    return c.fetchone()[0] # Unpack tuple to return bare None or int
+    company_id = c.fetchone()
+
+    return company_id[0] if company_id else None # Unpack returned value
 
 def _get_company_search_options(conn, company_id):
     '''Return search options given company id'''
@@ -59,6 +59,20 @@ def _dictify_by_first(search_options):
 def _url_decode(urlencoded):
     '''Replace the + in urlencoded strings with a space character'''
     return urlencoded.replace('+', ' ')
+
+class SQLiteDatabaseConnection(object):
+    '''Provides an object for opening and using an SQLite Database with python's 'with' syntax'''
+    def __init__(self, database):
+        self.database = database
+
+    def __enter__(self):
+        self._connection = sqlite3.connect(self.database)
+        return self._connection
+
+    def __exit__(self, type, value, traceback):
+        self._connection.close()
+        print type, value, traceback
+
 
 if __name__ == '__main__':
     run(host=args.server if args.server is not None else 'localhost',
