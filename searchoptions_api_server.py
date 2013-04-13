@@ -30,7 +30,7 @@ def search_companies(search_str):
     
     database = args.database if args.database is not None else 'db/search_database.sqlite'
     with SQLiteDatabaseConnection(database) as conn:
-        return {"matches":_search_company_names(conn, search_str)}
+        return {"matches":_search_company_names(conn, _url_decode(search_str))}
 
 def _get_company_id(conn, company_name):
     '''Return company id given company name'''
