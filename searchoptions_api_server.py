@@ -3,9 +3,9 @@ import argparse, sqlite3
 from bottle import route, run
 
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
-parser.add_argument('-s', '--server', help='hostname to run the server on')
-parser.add_argument('-o', '--port', help='port to run the server on', type=int)
-parser.add_argument('-d', '--database', help='SQLite database file to use')
+parser.add_argument('-s', '--server', help='hostname to run the server on', default='0.0.0.0')
+parser.add_argument('-o', '--port', help='port to run the server on', type=int, default='5000')
+parser.add_argument('-d', '--database', help='SQLite database file to use', default='db/search_database.sqlite')
 args = parser.parse_args()
 
 @route('/search/options/<company_name>')
@@ -88,5 +88,4 @@ class SQLiteDatabaseConnection(object):
 
 
 if __name__ == '__main__':
-    run(host=args.server if args.server is not None else 'localhost',
-        port=args.port if args.port is not None else 8080)
+    run(host=args.server, port=args.port)
