@@ -13,11 +13,11 @@ def main(csv_in, sqlite_out):
         for row, record in enumerate(csv_parselines(csv_in)):
             _clear_line()
             db_insert_records(conn, record)
-            print row, "rows inserted.",
+            print(row, "rows inserted.", sep="")
 
-        print "\nCommiting changes...",
+        print("\nCommiting changes...")
         conn.commit()
-        print "done"
+        print("done")
     finally:
         conn.close() # Failsafe, ensure connection closes.
         
@@ -25,7 +25,7 @@ def csv_parselines(filepath):
     '''A generator, which parses the csv a line at a time, returning records ready to read into the database'''
     with open(filepath, 'r') as csv_file:
         csv_reader = csv.reader(csv_file, dialect='excel')
-        csv_reader.next() # Skip headings
+        next(csv_reader) # Skip headings
         for row in csv_reader:
             yield parse_records(row)
 

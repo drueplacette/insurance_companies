@@ -15,7 +15,6 @@ def search_options_by_company(company_name):
     database = args.database if args.database is not None else 'db/search_database.sqlite'
     with SQLiteDatabaseConnection(database) as conn:
         company_id = _get_company_id(conn, _url_decode(company_name))
-        print company_id
         if company_id is None:
             return {}
 
@@ -85,7 +84,7 @@ class SQLiteDatabaseConnection(object):
 
     def __exit__(self, type, value, traceback):
         self._connection.close()
-        print type, value, traceback
+        print(type, value, traceback)
 
 
 if __name__ == '__main__':
