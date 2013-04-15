@@ -4,6 +4,8 @@ Web services to retrieve search information by insurance company.
 
 Setting Up
 ----------
+This API server requires Python 3.0+.
+
 First off, install the requirements:
 ```bash
 $ pip install -r requirements.txt
