@@ -1,20 +1,27 @@
 '''API server, returns search options for a company when company name is given.'''
 import argparse, sqlite3
-from bottle import route, run
+from bottle import Bottle, route, run
+from urlencode_filter import urlencode_filter
 
+# Argument Parser Setup
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
 parser.add_argument('-s', '--server', help='hostname to run the server on', default='0.0.0.0')
 parser.add_argument('-o', '--port', help='port to run the server on', type=int, default='5000')
 parser.add_argument('-d', '--database', help='SQLite database file to use', default='db/search_database.sqlite')
 args = parser.parse_args()
 
-@route('/search/options/<company_name>')
+# Setup
+app = Bottle()
+app.router.add_filter('urlencode', urlencode_filter)
+
+# Routing
+@app.route('/search/options/<company_name:urlencode>')
 def search_options_by_company(company_name):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
-    
-    database = args.database if args.database is not None else 'db/search_database.sqlite'
+
+    database = args.database
     with SQLiteDatabaseConnection(database) as conn:
-        company_id = _get_company_id(conn, _url_decode(company_name))
+        company_id = _get_company_id(conn, company_name)
         if company_id is None:
             return {}
 
@@ -23,14 +30,15 @@ def search_options_by_company(company_name):
     search_options = _dictify_by_first([option for option in search_options if option != []])
     return {'search-options': search_options}
 
-@route('/search/companies/<search_str>')
+@app.route('/search/companies/<search_str:urlencode>')
 def search_companies(search_str):
     '''Search for a valid company name using an incomplete string'''
     
-    database = args.database if args.database is not None else 'db/search_database.sqlite'
+    database = args.database
     with SQLiteDatabaseConnection(database) as conn:
-        return {"matches":_search_company_names(conn, _url_decode(search_str))}
+        return {"matches":_search_company_names(conn, search_str)}
 
+# Helper functions
 def _get_company_id(conn, company_name):
     '''Return company id given company name'''
     c = conn.cursor()
@@ -69,10 +77,6 @@ def _dictify_by_first(search_options):
 
     return search_dict
 
-def _url_decode(urlencoded):
-    '''Replace the + in urlencoded strings with a space character'''
-    return urlencoded.replace('+', ' ')
-
 class SQLiteDatabaseConnection(object):
     '''Provides an object for opening and using an SQLite Database with python's 'with' syntax'''
     def __init__(self, database):
@@ -88,4 +92,4 @@ class SQLiteDatabaseConnection(object):
 
 
 if __name__ == '__main__':
-    run(host=args.server, port=args.port)
+    app.run(host=args.server, port=args.port)
