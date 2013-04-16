@@ -36,14 +36,14 @@ def search_companies(search_str, db):
 
 # Helper functions
 def _get_company_id(db, company_name):
-    '''Return company id given company name'''
+    '''Return company id given company name, raises an error if not found'''
     company_id = db.execute('SELECT ROWID FROM company WHERE name=?', [company_name]).fetchone()
 
     if company_id:
         return company_id[0] # Unpack list
     else:
         raise NoSuchCompanyError(company_name)
-        return None
+
 
 def _get_company_search_options(db, company_id):
     '''Return search options given company id'''

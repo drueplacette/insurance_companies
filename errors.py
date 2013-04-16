@@ -15,12 +15,3 @@ class NoSuchCompanyError(APIError):
 
     def __repr__(self):
         return "No such company: {}".format(self.company)
-
-class NoSearchResultsError(APIError):
-    '''Exception thrown when a search fails to return any results'''
-    def __init__(self, search):
-        self.search     = search
-        self.json_error = self.api_error(self.__repr__())
-
-    def __repr__(self):
-        return "No search results for: {}".format(self.search)
