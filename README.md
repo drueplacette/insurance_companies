@@ -41,10 +41,10 @@ The API server responds to two types of requests: search options requests and co
 The route for these options is `/search/options/<insurance_company_name>`. If no such company exists, an empty JSON object will be returned.
 ```bash
 $ curl -l <server_address>/search/options/Aetna+Long+Term+Care
-{"search-options": {"1": ["subscriber_id", "subscriber_last_name", "subscriber_first_name", "subscriber_dob"]}}
+{"search_options": {"1": ["subscriber_id", "subscriber_last_name", "subscriber_first_name", "subscriber_dob"]}}
 
 $ curl -l <server_address>/search/options/Invalid+Name
-{}
+{"error": "No such company: Invalid Name"}
 ```
 
 **Company Search**

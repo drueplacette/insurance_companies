@@ -25,14 +25,14 @@ def search_options_by_company(company_name, db):
         company_id = _get_company_id(db, company_name)
         search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
         search_options = _dictify_by_first([option for option in search_options if option != []])
-        return {'search-options': search_options}
+        return {'search_options': search_options}
     except NoSuchCompanyError as e:
         return e.json_error
 
 @app.route('/search/companies/<search_str:urlencode>')
 def search_companies(search_str, db):
     '''Search for a valid company name using an incomplete string'''
-    return {"matches": _search_company_names(db, search_str)}
+    return {'matches': _search_company_names(db, search_str)}
 
 # Helper functions
 def _get_company_id(db, company_name):
