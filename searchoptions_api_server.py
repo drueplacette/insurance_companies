@@ -1,6 +1,6 @@
 '''API server, returns search options for a company when company name is given.'''
-import argparse, sqlite3
-from bottle import Bottle, route, run
+import argparse, sqlite3, bottle
+from bottle.ext import sqlite
 from urlencode_filter import urlencode_filter
 
 # Argument Parser Setup
@@ -11,59 +11,44 @@ parser.add_argument('-d', '--database', help='SQLite database file to use', defa
 args = parser.parse_args()
 
 # Setup
-app = Bottle()
-app.router.add_filter('urlencode', urlencode_filter)
+app = bottle.Bottle()
+app.router.add_filter('urlencode', urlencode_filter)    # urlencoding filter
+app_db = sqlite.Plugin(dbfile=args.database) # sqlite plugin, automatically passes database connection  
+app.install(app_db)                          # to any route with a 'db' argument  
 
 # Routing
 @app.route('/search/options/<company_name:urlencode>')
-def search_options_by_company(company_name):
+def search_options_by_company(company_name, db):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
+    company_id = _get_company_id(db, company_name)
+    if company_id is None:
+        return {}
 
-    database = args.database
-    with SQLiteDatabaseConnection(database) as conn:
-        company_id = _get_company_id(conn, company_name)
-        if company_id is None:
-            return {}
-
-        search_options = _remove_empty_fields(_get_company_search_options(conn, company_id))
-
+    search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
     search_options = _dictify_by_first([option for option in search_options if option != []])
     return {'search-options': search_options}
 
 @app.route('/search/companies/<search_str:urlencode>')
-def search_companies(search_str):
+def search_companies(search_str, db):
     '''Search for a valid company name using an incomplete string'''
-    
-    database = args.database
-    with SQLiteDatabaseConnection(database) as conn:
-        return {"matches":_search_company_names(conn, search_str)}
+    return {"matches": _search_company_names(db, search_str)}
 
 # Helper functions
-def _get_company_id(conn, company_name):
+def _get_company_id(db, company_name):
     '''Return company id given company name'''
-    c = conn.cursor()
-    c.execute('SELECT ROWID FROM company WHERE name=?', [company_name])
-    company_id = c.fetchone()
-
+    company_id = db.execute('SELECT ROWID FROM company WHERE name=?', [company_name]).fetchone()
     return company_id[0] if company_id else None # Unpack returned value
 
-def _get_company_search_options(conn, company_id):
+def _get_company_search_options(db, company_id):
     '''Return search options given company id'''
-    c = conn.cursor()
-    c.execute('''SELECT searchoption, field1, field2, field3, field4, field5, field6
-                 FROM search
-                 WHERE searchcompany=?''', [company_id])
-    return c.fetchall()
+    return db.execute('''SELECT searchoption, field1, field2, field3, field4, field5, field6
+                         FROM search
+                         WHERE searchcompany=?''', [company_id]).fetchall()
 
-def _search_company_names(conn, search_str):
+def _search_company_names(db, search_str):
     '''Perform a search for a company name given a partially complete string, and return possible matches as JSON'''
-    c = conn.cursor()
-    c.execute('SELECT name FROM company WHERE name LIKE ?', ['%' + search_str + '%'])
-    return [_flatten_result(result) for result in c.fetchall()]
-
-def _flatten_result(result):
-    '''Flatten a search result from a SELECT statement where only one value is returned'''
-    return result[0]
+    search_results = db.execute('SELECT name FROM company WHERE name LIKE ?', ['%' + search_str + '%']).fetchall()
+    return [result[0] for result in search_results] # Flatten Results
 
 def _remove_empty_fields(search_options):
     '''Remove any empty fields from a search option'''
@@ -76,20 +61,6 @@ def _dictify_by_first(search_options):
         search_dict[option[0]] = option[1:] # First item of option as key, rest as value list
 
     return search_dict
-
-class SQLiteDatabaseConnection(object):
-    '''Provides an object for opening and using an SQLite Database with python's 'with' syntax'''
-    def __init__(self, database):
-        self.database = database
-
-    def __enter__(self):
-        self._connection = sqlite3.connect(self.database)
-        return self._connection
-
-    def __exit__(self, type, value, traceback):
-        self._connection.close()
-        print(type, value, traceback)
-
 
 if __name__ == '__main__':
     app.run(host=args.server, port=args.port)
