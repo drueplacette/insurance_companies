@@ -1,5 +1,5 @@
 '''API server, returns search options for a company when company name is given.'''
-import argparse, sqlite3, bottle
+import argparse, bottle
 from bottle.ext import sqlite
 from urlencode_filter import urlencode_filter
 
