@@ -2,6 +2,7 @@
 import argparse, bottle
 from bottle.ext import sqlite
 from urlencode_filter import urlencode_filter
+from errors import NoSuchCompanyError, NoSearchResultsError
 
 # Argument Parser Setup
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
@@ -20,13 +21,13 @@ app.install(app_db)                          # to any route with a 'db' argument
 @app.route('/search/options/<company_name:urlencode>')
 def search_options_by_company(company_name, db):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
-    company_id = _get_company_id(db, company_name)
-    if company_id is None:
-        return {}
-
-    search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
-    search_options = _dictify_by_first([option for option in search_options if option != []])
-    return {'search-options': search_options}
+    try:
+        company_id = _get_company_id(db, company_name)
+        search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
+        search_options = _dictify_by_first([option for option in search_options if option != []])
+        return {'search-options': search_options}
+    except NoSuchCompanyError as e:
+        return e.json_error
 
 @app.route('/search/companies/<search_str:urlencode>')
 def search_companies(search_str, db):
@@ -37,7 +38,12 @@ def search_companies(search_str, db):
 def _get_company_id(db, company_name):
     '''Return company id given company name'''
     company_id = db.execute('SELECT ROWID FROM company WHERE name=?', [company_name]).fetchone()
-    return company_id[0] if company_id else None # Unpack returned value
+
+    if company_id:
+        return company_id[0] # Unpack list
+    else:
+        raise NoSuchCompanyError(company_name)
+        return None
 
 def _get_company_search_options(db, company_id):
     '''Return search options given company id'''

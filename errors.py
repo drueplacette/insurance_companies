@@ -1,20 +1,26 @@
 '''Exception classes for better JSON errors'''
 
 class APIError(Exception):
-    def api_error(message):
+    '''Base Exception class for the Insurance Company Search API'''
+    @classmethod
+    def api_error(cls, message):
         '''JSON wrapper function for errors returned via JSON API'''
-        return {"errors": message}
+        return {"error": message}
 
 class NoSuchCompanyError(APIError):
+    '''Exception thrown when a company cannot be found in the database'''
     def __init__(self, company):
-        self.company = company
+        self.company    = company
+        self.json_error = self.api_error(self.__repr__())
 
     def __repr__(self):
-        return self.api_error("No such company: {}".format(self.company))
+        return "No such company: {}".format(self.company)
 
 class NoSearchResultsError(APIError):
+    '''Exception thrown when a search fails to return any results'''
     def __init__(self, search):
-        self.search = search
+        self.search     = search
+        self.json_error = self.api_error(self.__repr__())
 
     def __repr__(self):
-        return self.api_error("No search results for: {}".format(self.search))
+        return "No search results for: {}".format(self.search)
