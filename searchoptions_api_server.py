@@ -1,7 +1,7 @@
 '''API server, returns search options for a company when company name is given.'''
 import argparse, bottle
 from bottle.ext import sqlite
-from urlencode_filter import urlencode_filter
+from filters import urlencode_filter, uppercase_filter
 from errors import NoCompanyNameError, NoPayerIDError
 
 # Argument Parser Setup
@@ -14,6 +14,7 @@ args = parser.parse_args()
 # Setup
 app = bottle.Bottle()
 app.router.add_filter('urlencode', urlencode_filter)    # urlencoding filter
+app.router.add_filter('uppercase', uppercase_filter)    # urlencoding filter
 app_db = sqlite.Plugin(dbfile=args.database) # sqlite plugin, automatically passes database connection  
 app.install(app_db)                          # to any route with a 'db' argument  
 
@@ -29,7 +30,7 @@ def search_options_by_company(company_name, db):
     except NoCompanyNameError as e:
         return e.json_error
 
-@app.route('/search/options/id/<payer_id>')
+@app.route('/search/options/id/<payer_id:uppercase>')
 def search_options_by_company_id(payer_id, db):
     '''Retrieve and respond with the search options for a given company payer_id, or an error if no such company exists'''
     try:

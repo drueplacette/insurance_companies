@@ -31,7 +31,7 @@ def csv_parselines(filepath):
 
 def parse_records(row):
     '''Takes a flat list and returns a dictionary containing the company name and a list of numbered options'''
-    return {'company':row[0], 'payer_id':row[1], 'search_options':_parse_search_options(row)}
+    return {'company':row[0], 'payer_id':row[1].upper(), 'search_options':_parse_search_options(row)}
 
 def db_insert_records(db_conn, parsed_records):
     '''Inserts parsed records into the database'''
