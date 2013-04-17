@@ -1,5 +1,5 @@
 '''
-Defines a filter for the bottly.py framework which handles decoding of
+Defines a filter for the bottle.py framework which handles decoding of
 urlencoded parameters.
 '''
 
