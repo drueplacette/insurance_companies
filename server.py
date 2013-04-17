@@ -1,7 +1,7 @@
 '''API server, returns search options for a company when company name is given.'''
 import argparse, bottle, os
 from bottle.ext import sqlite
-from filters import urlencode_filter, uppercase_filter
+import filters
 from errors import NoCompanyNameError, NoPayerIDError
 
 # Argument Parser Setup
@@ -13,10 +13,10 @@ args = parser.parse_args()
 
 # Setup
 app = bottle.Bottle()
-app.router.add_filter('urlencode', urlencode_filter)    # urlencoding filter
-app.router.add_filter('uppercase', uppercase_filter)    # urlencoding filter
-app_db = sqlite.Plugin(dbfile=args.database) # sqlite plugin, automatically passes database connection  
-app.install(app_db)                          # to any route with a 'db' argument  
+app.router.add_filter('urlencode', filters.urlencode)   # urlencoding filter
+app.router.add_filter('uppercase', filters.uppercase)   # urlencoding filter
+app_db = sqlite.Plugin(dbfile=args.database)            # sqlite plugin, automatically passes database connection  
+app.install(app_db)                                     # to any route with a 'db' argument  
 
 # Routing
 @app.route('/search/options/name/<company_name:urlencode>')
