@@ -27,10 +27,10 @@ $ cd ..
 
 After that, start the api server. The default port is 8080, but you can specify a different one using the -p option
 ```bash
-$ python searchoptions_api_server.py -p <port>
+$ python searchoptions_api_server.py
 ```
 
-You can also specify hostname and database for the server. Call up its help to view the options for these.
+By default the port the server binds to is taken from env["PORT"], or if there is no such env variable, port 5000. In the general use case, the server will bind tolocalhost:5000. You can also specify hostname and database for the server. Call up its help to view the options for these.
 
 Supported Requests
 ------------------
@@ -40,21 +40,30 @@ The API server responds to two types of requests: search options requests and co
 
 The route for these options is `/search/options/<insurance_company_name>`. If no such company exists, an empty JSON object will be returned.
 ```bash
-$ curl -l <server_address>/search/options/Aetna+Long+Term+Care
+$ curl -l <server_address>/search/options/name/Aetna+Long+Term+Care
 {"search_options": {"1": ["subscriber_id", "subscriber_last_name", "subscriber_first_name", "subscriber_dob"]}}
 
-$ curl -l <server_address>/search/options/Invalid+Name
-{"error": "No such company: Invalid Name"}
+$ curl -l <server_address>/search/options/name/Invalid+Name
+{"error": "No such company with name: Invalid Name"}
 ```
+You can also search by the company's payer id.
+```bash
+$ curl -l <server_address>/search/options/id/CTOTL
+...
+
+$ curl -l <server_address>/search/options/id/INVALID
+{"error": "No such company with payer id: INVALID"}
+```
+
 
 **Company Search**
 
 The route for searching companies is `/search/companies/<search_string>`. If no companies are found, the "matches" attribute of the returned JSON object will be empty.
 ```bash
-$ curl -l <server_address>/search/companies/AARP
+$ curl -l <server_address>/lookup/companies/AARP
 {"matches": ["AARP"]}
 
-$ curl -l <server_address>/search/companies/Invalid+Name
+$ curl -l <server_address>/lookup/companies/Invalid+Name
 {"matches": []}
 ```
 
