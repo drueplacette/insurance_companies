@@ -13,9 +13,9 @@ def main(csv_in, sqlite_out):
         for row, record in enumerate(csv_parselines(csv_in)):
             _clear_line()
             db_insert_records(conn, record)
-            print(row, "rows inserted.", sep="")
+            print(row, "rows inserted.", end="")
 
-        print("\nCommiting changes...")
+        print("\nCommiting changes...", end="")
         conn.commit()
         print("done")
     finally:
@@ -31,14 +31,16 @@ def csv_parselines(filepath):
 
 def parse_records(row):
     '''Takes a flat list and returns a dictionary containing the company name and a list of numbered options'''
-    return {'company':row[0], 'search_options':_parse_search_options(row)}
+    return {'company':row[0], 'payer_id':row[1], 'search_options':_parse_search_options(row)}
 
 def db_insert_records(db_conn, parsed_records):
     '''Inserts parsed records into the database'''
     db_cursor = db_conn.cursor()
 
     # Insert Company Name
-    db_cursor.execute('INSERT INTO company VALUES (NULL, ?)', [parsed_records['company']])
+    db_cursor.execute('INSERT INTO company VALUES (NULL, ?, ?)', 
+                      [parsed_records['company'], parsed_records['payer_id']])
+
     # Retrieve Company ID
     company_id = db_cursor.lastrowid
     # Add search options
@@ -51,7 +53,7 @@ def db_insert_records(db_conn, parsed_records):
 def _parse_search_options(row):
     '''Parse the search options for a specific row, returning a list of options (list of lists of fields)'''
     # fallback approach due to uneven field sizes. Messy.
-    search_options = [row[2:6], row[8:13]] + [row[(i*6)+14+1:(i*6)+14+6] for i in range(9)]
+    search_options = [row[3:7], row[9:14]] + [row[(i*6)+15+1:(i*6)+15+6] for i in range(9)]
     # Remove empty fields from options
     search_options = [[field for field in option if field != ''] 
                         for option in search_options]
