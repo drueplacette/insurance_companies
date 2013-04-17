@@ -1,5 +1,5 @@
 '''API server, returns search options for a company when company name is given.'''
-import argparse, bottle
+import argparse, bottle, os
 from bottle.ext import sqlite
 from filters import urlencode_filter, uppercase_filter
 from errors import NoCompanyNameError, NoPayerIDError
@@ -7,7 +7,7 @@ from errors import NoCompanyNameError, NoPayerIDError
 # Argument Parser Setup
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
 parser.add_argument('-s', '--server', help='hostname to run the server on', default='0.0.0.0')
-parser.add_argument('-o', '--port', help='port to run the server on', type=int, default='5000')
+parser.add_argument('-o', '--port', help='port to run the server on', type=int, default=int(os.environ.get('PORT', 5000)))
 parser.add_argument('-d', '--database', help='SQLite database file to use', default='db/search_database.sqlite')
 args = parser.parse_args()
 
