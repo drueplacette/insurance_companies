@@ -2,7 +2,7 @@
 import argparse, bottle
 from bottle.ext import sqlite
 from urlencode_filter import urlencode_filter
-from errors import NoSuchCompanyError, NoSearchResultsError
+from errors import NoCompanyNameError, NoPayerIDError
 
 # Argument Parser Setup
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
@@ -18,32 +18,51 @@ app_db = sqlite.Plugin(dbfile=args.database) # sqlite plugin, automatically pass
 app.install(app_db)                          # to any route with a 'db' argument  
 
 # Routing
-@app.route('/search/options/<company_name:urlencode>')
+@app.route('/search/options/name/<company_name:urlencode>')
 def search_options_by_company(company_name, db):
     '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
     try:
-        company_id = _get_company_id(db, company_name)
+        company_id = _get_company_id_by_name(db, company_name)
         search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
         search_options = _dictify_by_first([option for option in search_options if option != []])
         return {'search_options': search_options}
-    except NoSuchCompanyError as e:
+    except NoCompanyNameError as e:
         return e.json_error
 
-@app.route('/search/companies/<search_str:urlencode>')
+@app.route('/search/options/id/<payer_id>')
+def search_options_by_company_id(payer_id, db):
+    '''Retrieve and respond with the search options for a given company payer_id, or an error if no such company exists'''
+    try:
+        company_id = _get_company_id_by_payer_id(db, payer_id)
+        search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
+        search_options = _dictify_by_first([option for option in search_options if option != []])
+        return {'search_options': search_options}
+    except NoPayerIDError as e:
+        return e.json_error
+
+@app.route('/lookup/companies/<search_str:urlencode>')
 def search_companies(search_str, db):
     '''Search for a valid company name using an incomplete string'''
     return {'matches': _search_company_names(db, search_str)}
 
 # Helper functions
-def _get_company_id(db, company_name):
+def _get_company_id_by_name(db, company_name):
     '''Return company id given company name, raises an error if not found'''
     company_id = db.execute('SELECT ROWID FROM company WHERE name=?', [company_name]).fetchone()
 
     if company_id:
         return company_id[0] # Unpack list
     else:
-        raise NoSuchCompanyError(company_name)
+        raise NoCompanyNameError(company_name)
 
+def _get_company_id_by_payer_id(db, payer_id):
+    '''Return company id given a payer ID'''
+    company_id = db.execute('SELECT ROWID FROM company WHERE payerid=?', [payer_id]).fetchone()
+
+    if company_id:
+        return company_id[0] # Unpack list
+    else:
+        raise NoPayerIDError(payer_id)
 
 def _get_company_search_options(db, company_id):
     '''Return search options given company id'''
