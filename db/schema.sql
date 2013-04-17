@@ -1,7 +1,9 @@
 CREATE TABLE company (
 id integer PRIMARY KEY,
-name text
+name    text,
+payerid text
 );
+
 CREATE TABLE search (
 id integer PRIMARY KEY,
 searchcompany integer,
