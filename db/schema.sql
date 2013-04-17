@@ -1,17 +1,17 @@
-CREATE TABLE company (
+CREATE TABLE companies (
 id integer PRIMARY KEY,
-name    text,
-payerid text
+name     string,
+payer_id string
 );
 
-CREATE TABLE search (
+CREATE TABLE search_options (
 id integer PRIMARY KEY,
-searchcompany integer,
-searchoption integer,
-field1 text,
-field2 text,
-field3 text,
-field4 text,
-field5 text,
-field6 text
+company_id integer,
+option_number integer,
+field1 string,
+field2 string,
+field3 string,
+field4 string,
+field5 string,
+field6 string
 );
