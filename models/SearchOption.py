@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from Base import Base
 
 class SearchOption(Base):
     '''ORM model for records in the 'search_options' table'''

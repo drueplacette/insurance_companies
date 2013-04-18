@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, backref
-from sqlalchemt.ext.declarative import declarative_base
+from Base import Base
 
-class Company(declarative_base):
+class Company(Base):
     '''ORM model for records in the 'companies' table'''
     __tablename__ = 'companies'
 
