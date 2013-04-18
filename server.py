@@ -4,7 +4,7 @@ from bottle.ext import sqlalchemy
 from sqlalchemy import create_engine
 import filters, config
 from models import Base, Company, SearchOption
-from errors import NoCompanyNameError, NoPayerIDError
+from errors import NoCompanyNameError, NoPayerIDError, NoSearchResultsError
 
 # Argument Parser Setup
 parser = argparse.ArgumentParser(description='Serve requests for search options by insurance company name')
@@ -42,20 +42,42 @@ def search_options_by_payer_id(payer_id, db):
     except NoPayerIDError as e:
         return e.json_error
 
-@app.get('/search_options/name/<company_name:urlencode>')
-def search_options_by_company_name(company_name, db):
+@app.get('/search_options/name/<name:urlencode>')
+def search_options_by_name(name, db):
     '''Find search options for a given company by name'''
-    pass
+    try:
+        company = db.query(Company).filter_by(name=name).first()
+        if company is None:
+            raise NoCompanyNameError(payer_id)
+        return {"search_options":[option.jsonify() for option in company.search_options]}
+
+    except NoCompanyNameError as e:
+        return e.json_error
 
 @app.get('/company/id/<search_id:uppercase>')
 def find_company_by_payer_id(search_id, db):
     '''Search for a company by id'''
-    pass
+    try:
+        companies = db.query(Company).filter(Company.payer_id.like('%{}%'.format(search_id))).all()
+        if len(companies) == 0:
+            raise NoSearchResultsError(search_id)
+        return {"search_results":[company.jsonify() for company in companies]}
+
+    except NoSearchResultsError as e:
+        return e.json_error
+
 
 @app.get('/company/name/<search_name:urlencode>')
-def find_company_by_company_name(search_name, db):
+def find_company_by_name(search_name, db):
     '''Search for a company by name'''
-    pass
+    try:
+        companies = db.query(Company).filter(Company.name.like('%{}%'.format(search_name))).all()
+        if len(companies) == 0:
+            raise NoSearchResultsError(search_name)
+        return {"search_results":[company.jsonify() for company in companies]}
+
+    except NoSearchResultsError as e:
+        return e.json_error
 
 if __name__ == '__main__':
     app.run(host=args.server, port=args.port)
