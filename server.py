@@ -23,19 +23,26 @@ app_db = sqlalchemy.Plugin(
     engine,
     Base.metadata,
     keyword='db',
-    create=True,
-    commit=True,
+    create=True,  # Automatically create db and tables if they don't exist
+    commit=False, # API server can't alter database
     use_kwargs=False
 )
 app.install(app_db) # plugin passes db session to any route with a 'db' argument  
 
 # Routing
-@app.get('/searchoptions/id/<payer_id:urlencode>')
+@app.get('/search_options/id/<payer_id:urlencode>')
 def search_options_by_payer_id(payer_id, db):
     '''Find search options for a given company by payer ID'''
-    pass
+    try:
+        company = db.query(Company).filter_by(payer_id=payer_id).first()
+        if company is None:
+            raise NoPayerIDError(payer_id)
+        return {"search_options":[option.jsonify() for option in company.search_options]}
 
-@app.get('/searchoptions/name/<company_name:urlencode>')
+    except NoPayerIDError as e:
+        return e.json_error
+
+@app.get('/search_options/name/<company_name:urlencode>')
 def search_options_by_company_name(company_name, db):
     '''Find search options for a given company by name'''
     pass

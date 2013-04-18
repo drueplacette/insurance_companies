@@ -12,9 +12,13 @@ class Company(Base):
 
     search_options = relationship("SearchOption", order_by="SearchOption.option_number", backref="company")
 
-    def __init__(self, name, payerid=''):
+    def __init__(self, name, payer_id=''):
         self.name = name
-        self.payer_id = payerid
+        self.payer_id = payer_id
 
     def __repr__(self):
-        return '< Company ({}, {}) >'.format(self.name, self.payerid)
+        return '< Company ({}, {}) >'.format(self.name, self.payer_id)
+
+    def jsonify(self):
+        '''Convert model to dictionary for the API server to serve'''
+        return { "name":self.name, "payer_id":self.payer_id }

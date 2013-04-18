@@ -16,7 +16,7 @@ class SearchOption(Base):
     field5 = Column(String)
     field6 = Column(String)
 
-    company = relationship('Company', backref=backref('search_options', order_by=id))
+    # company = relationship('Company', backref=backref('search_options', order_by=id))
 
     def __init__(self, company_id, option_number, field1='', field2='', field3='',
                                                   field4='', field5='', field6=''):
@@ -34,3 +34,11 @@ class SearchOption(Base):
                self.company_id, self.option_number,
                self.field1, self.field2, self.field3,
                self.field4, self.field5, self.field6)
+
+    def jsonify(self):
+        '''Convert model to dictionary for the API server to serve'''
+        fields = [self.field1, self.field2, self.field3, 
+                  self.field4, self.field5, self.field6]
+        fields = [field for field in fields if field != ''] # Remove empty fields
+
+        return { "option_number":self.option_number, "fields":fields }

@@ -38,7 +38,7 @@ def db_insert_records(db_conn, parsed_records):
     db_cursor = db_conn.cursor()
 
     # Insert Company Name
-    db_cursor.execute('INSERT INTO company VALUES (NULL, ?, ?)', 
+    db_cursor.execute('INSERT INTO companies VALUES (NULL, ?, ?)', 
                       [parsed_records['company'], parsed_records['payer_id']])
 
     # Retrieve Company ID
@@ -47,7 +47,7 @@ def db_insert_records(db_conn, parsed_records):
     for search_option in parsed_records['search_options']:
         if len(search_option) < 7:
             search_option += ['']*(7-len(search_option)) # Pad empty search terms
-        db_cursor.execute('''INSERT INTO search VALUES (NULL, ?,?,?,?,?,?,?,?)''', 
+        db_cursor.execute('''INSERT INTO search_options VALUES (NULL, ?,?,?,?,?,?,?,?)''', 
                         [company_id] + search_option)
 
 def _parse_search_options(row):
