@@ -11,12 +11,12 @@ First off, install the requirements:
 $ pip install -r requirements.txt
 ```
 
-Create a database file in /db/. The suggested name is 'search_database.sqlite', as this is the api server's default.
+Run the API server and then close it to generate database tables. You can change the database the app points to in config/database.py. The default database is an sqlite database: 'db/search_database.sqlite'.
 ```bash
-$ cd db
-$ cat schema.sql | sqlite3 search_database.sqlite
-$ cd ..
+$ python server.py
 ```
+
+**WARNING: database population is currently under change. The below script will ONLY work for SQLite databases.**
 
 Next you need to populate the database. To do this you'll need to export a CSV file from the Search Options by Insurance Company excel spreadsheet. After that's done, use scripts/build_db.py to build the database.
 ```bash
@@ -25,9 +25,9 @@ $ python build_db.py <path-to-csv-file> ../db/search_database.sqlite
 $ cd ..
 ```
 
-After that, start the api server. The default port is 8080, but you can specify a different one using the -p option
+After that, start the api server. The default host and port are 0.0.0.0 and 5000 - you can specify different ones using the -s and -p options. If the environment has a PORT env variable set, that will be the default if none is specified by the user.
 ```bash
-$ python searchoptions_api_server.py
+$ python server.py
 ```
 
 By default the port the server binds to is taken from env["PORT"], or if there is no such env variable, port 5000. In the general use case, the server will bind tolocalhost:5000. You can also specify hostname and database for the server. Call up its help to view the options for these.
@@ -36,36 +36,16 @@ Supported Requests
 ------------------
 The API server responds to two types of requests: search options requests and company search requests.
 
-**Search Options**
+**Search Options and Company Lookups**
 
-The route for these options is `/search/options/<insurance_company_name>`. If no such company exists, an empty JSON object will be returned.
-```bash
-$ curl -l <server_address>/search/options/name/Aetna+Long+Term+Care
-{"search_options": {"1": ["subscriber_id", "subscriber_last_name", "subscriber_first_name", "subscriber_dob"]}}
+These routes are currently avalaible:
+For retrieving search options:
+* `/searchoptions/name/<company_name>`
+* `/searchoptions/id/<payer_id>`
 
-$ curl -l <server_address>/search/options/name/Invalid+Name
-{"error": "No such company with name: Invalid Name"}
-```
-You can also search by the company's payer id.
-```bash
-$ curl -l <server_address>/search/options/id/CTOTL
-...
-
-$ curl -l <server_address>/search/options/id/INVALID
-{"error": "No such company with payer id: INVALID"}
-```
-
-
-**Company Search**
-
-The route for searching companies is `/search/companies/<search_string>`. If no companies are found, the "matches" attribute of the returned JSON object will be empty.
-```bash
-$ curl -l <server_address>/lookup/companies/AARP
-{"matches": ["AARP"]}
-
-$ curl -l <server_address>/lookup/companies/Invalid+Name
-{"matches": []}
-```
+For looking up companies:
+* `/company/name/<partial_name>`
+* `/company/id/<partial_id>`
 
 Updating the Database
 ---------------------
@@ -75,10 +55,10 @@ Bundled Scripts
 ---------------
 **scripts/build_db.py**
 
-Takes an excel-generated CSV file of the insurance companies and possible search queries and builds an SQLite database from it.
+Takes an excel-generated CSV file of the insurance companies and uses it to populate an SQLite database.
 
 Usage:
-```bash`
+```bash
 $ cd scripts
-$ python build_db.py <input_csv_file> <output_sqlite_file>
+$ python build_db.py <input_csv_file> <sqlite_db_file>
 ```
