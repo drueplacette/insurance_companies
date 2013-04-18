@@ -1,0 +1,3 @@
+'''Configuration settings for the database'''
+import os
+database_URI = os.environ.get('DATABASE_URL') # Will get the heroku-set DATABASE_URL env var
