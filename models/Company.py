@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, backref
-from Base import Base
+from .Base import Base
 
 class Company(Base):
     '''ORM model for records in the 'companies' table'''

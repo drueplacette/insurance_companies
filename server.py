@@ -1,6 +1,7 @@
 '''API server, returns search options for a company when company name is given.'''
 import argparse, bottle, os
 from bottle.ext import sqlalchemy
+from sqlalchemy import create_engine
 import filters, config
 from models import Base, Company, SearchOption
 from errors import NoCompanyNameError, NoPayerIDError
@@ -29,29 +30,25 @@ app_db = sqlalchemy.Plugin(
 app.install(app_db) # plugin passes db session to any route with a 'db' argument  
 
 # Routing
-@app.get('/search/options/name/<company_name:urlencode>')
-def search_options_by_company(company_name, db):
-    '''Retrieve and respond with the search options for a given company name, or empty JSON if no such company exists'''
-    try:
-        company_id = _get_company_id_by_name(db, company_name)
-        search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
-        search_options = _dictify_by_first([option for option in search_options if option != []])
-        return {'search_options': search_options}
-    except NoCompanyNameError as e:
-        return e.json_error
+@app.get('/searchoptions/id/<payer_id:urlencode>')
+def search_options_by_payer_id(payer_id, db):
+    '''Find search options for a given company by payer ID'''
+    pass
 
-@app.get('/search/options/id/<payer_id:uppercase>')
-def search_options_by_company_id(payer_id, db):
-    '''Retrieve and respond with the search options for a given company payer_id, or an error if no such company exists'''
-    try:
-        company_id = _get_company_id_by_payer_id(db, payer_id)
-        search_options = _remove_empty_fields(_get_company_search_options(db, company_id))
-        search_options = _dictify_by_first([option for option in search_options if option != []])
-        return {'search_options': search_options}
-    except NoPayerIDError as e:
-        return e.json_error
+@app.get('/searchoptions/name/<company_name:urlencode>')
+def search_options_by_company_name(company_name, db):
+    '''Find search options for a given company by name'''
+    pass
 
-@app.get('/lookup/companies/<search_str:urlencode>')
-def search_companies(search_str, db):
-    '''Search for a valid company name using an incomplete string'''
-    return {'matches': _search_company_names(db, search_str)}
+@app.get('/company/id/<search_id:uppercase>')
+def find_company_by_payer_id(search_id, db):
+    '''Search for a company by id'''
+    pass
+
+@app.get('/company/name/<search_name:urlencode>')
+def find_company_by_company_name(search_name, db):
+    '''Search for a company by name'''
+    pass
+
+if __name__ == '__main__':
+    app.run(host=args.server, port=args.port)

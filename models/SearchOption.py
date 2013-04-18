@@ -1,12 +1,12 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from Base import Base
+from .Base import Base
 
 class SearchOption(Base):
     '''ORM model for records in the 'search_options' table'''
     __tablename__ = 'search_options'
 
-    id = Column(Integer)
+    id = Column(Integer, primary_key=True)
     company_id = Column(Integer, ForeignKey('companies.id'))
     option_number = Column(Integer)
     field1 = Column(String)
@@ -18,7 +18,7 @@ class SearchOption(Base):
 
     company = relationship('Company', backref=backref('search_options', order_by=id))
 
-    def __init__(self, company_id, option_number, field1='', field2='', field3=''
+    def __init__(self, company_id, option_number, field1='', field2='', field3='',
                                                   field4='', field5='', field6=''):
         self.company_id = company_id
         self.option_number = option_number
