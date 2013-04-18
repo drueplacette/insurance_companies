@@ -1,5 +1,5 @@
 SQLAlchemy==0.8.0
 bottle==0.11.6
-bottle-sqlite==0.1.2
+bottle-sqlalchemy==0.4
 distribute==0.6.34
 wsgiref==0.1.2
