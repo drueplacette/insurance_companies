@@ -33,47 +33,41 @@ app.install(app_db) # plugin passes db session to any route with a 'db' argument
 @app.get('/search_options/id/<payer_id:urlencode>')
 def search_options_by_payer_id(payer_id, db):
     '''Find search options for a given company by payer ID'''
-    try:
-        company = db.query(Company).filter_by(payer_id=payer_id).first()
-        if company is None:
-            raise NoPayerIDError(payer_id)
-        return {"search_options":[option.jsonify() for option in company.search_options]}
-
-    except NoPayerIDError as e:
-        return e.json_error
+    return search_options_by('payer_id', payer_id, NoPayerIDError, db)
 
 @app.get('/search_options/name/<name:urlencode>')
 def search_options_by_name(name, db):
     '''Find search options for a given company by name'''
-    try:
-        company = db.query(Company).filter_by(name=name).first()
-        if company is None:
-            raise NoCompanyNameError(payer_id)
-        return {"search_options":[option.jsonify() for option in company.search_options]}
-
-    except NoCompanyNameError as e:
-        return e.json_error
+    return search_options_by('name', name, NoCompanyNameError, db)
 
 @app.get('/company/id/<search_id:uppercase>')
 def find_company_by_payer_id(search_id, db):
     '''Search for a company by id'''
-    try:
-        companies = db.query(Company).filter(Company.payer_id.like('%{}%'.format(search_id))).all()
-        if len(companies) == 0:
-            raise NoSearchResultsError(search_id)
-        return {"search_results":[company.jsonify() for company in companies]}
-
-    except NoSearchResultsError as e:
-        return e.json_error
-
+    return find_company_by('payer_id', search_id, db)
 
 @app.get('/company/name/<search_name:urlencode>')
 def find_company_by_name(search_name, db):
     '''Search for a company by name'''
+    return find_company_by('name', search_name, db)
+
+# Helpers
+def search_options_by(attribute_name, attribute_value, Error, db):
+    '''Helper for retrieving search options by some attribute'''
     try:
-        companies = db.query(Company).filter(Company.name.like('%{}%'.format(search_name))).all()
+        company = db.query(Company).filter(getattr(Company, attribute_name)==attribute_value).first()
+        if company is None:
+            raise Error(attribute_value)
+        return {"search_options":[option.jsonify() for option in company.search_options]}
+
+    except Error as e:
+        return e.json_error
+
+def find_company_by(attribute_name, attribute_value, db):
+    '''Helper for searching for companies by some attribute'''
+    try:
+        companies = db.query(Company).filter(getattr(Company, attribute_name).like('%{}%'.format(attribute_value))).all()
         if len(companies) == 0:
-            raise NoSearchResultsError(search_name)
+            raise NoSearchResultsError(attribute_value)
         return {"search_results":[company.jsonify() for company in companies]}
 
     except NoSearchResultsError as e:
