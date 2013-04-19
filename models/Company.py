@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Sequence
 from sqlalchemy.orm import relationship, backref
 from .Base import Base
 
@@ -6,7 +6,7 @@ class Company(Base):
     '''ORM model for records in the 'companies' table'''
     __tablename__ = 'companies'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
     name = Column(String)
     payer_id = Column(String)
 

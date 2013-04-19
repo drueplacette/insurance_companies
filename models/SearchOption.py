@@ -6,7 +6,7 @@ class SearchOption(Base):
     '''ORM model for records in the 'search_options' table'''
     __tablename__ = 'search_options'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
     company_id = Column(Integer, ForeignKey('companies.id'))
     option_number = Column(Integer)
     field1 = Column(String)

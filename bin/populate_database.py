@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Path magic, need the models and configs from elsewhere
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..')))
-from models import Base, Company, SearchOption
+from models import * # Required for automated db builds
 from config.database import database_URI
 
 parser = argparse.ArgumentParser(prog='populate_database')
@@ -24,7 +24,7 @@ def main(csv_filepath):
 
     for row, record in enumerate(csv_parselines(csv_filepath)):
         clear_line()
-        print(row, end=' ')
+        print(row, 'rows inserted...', end=' ')
         company = Company(record['name'], record['payer_id'])
         session.add(company)
         session.commit() # Commits the company record to the db,
@@ -33,6 +33,8 @@ def main(csv_filepath):
             search_option = SearchOption(company.id, *option)
             session.add(search_option)
         session.commit()
+
+    print 'done'
 
 def csv_parselines(csv_filepath):
     '''Yield parsed CSV lines one at a time'''
