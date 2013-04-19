@@ -47,14 +47,4 @@ Configuration
 -------------
 ...(for the moment, look in config/*.py)
 
-Bundled Scripts
----------------
-**bin/populate_database.py**
-
-Takes an excel-generated CSV file of the insurance companies and uses it to populate the database specified in the config.
-
-Usage:
-```bash
-$ cd scripts
-$ python build_db.py <input_csv_file>
-```
+A lot of the database and port stuff can be handled automatically using the env vars PORT and DATABASE_URI
