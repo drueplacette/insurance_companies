@@ -4,25 +4,17 @@ Web services to retrieve search information by insurance company.
 
 Setting Up
 ----------
-This API server requires Python 3.0+.
+**This API server requires Python 3.0+.**
 
-First off, install the requirements:
+
+First off, install the requirements (creating a virtualenv first if you wish):
 ```bash
 $ pip install -r requirements.txt
 ```
 
-Run the API server and then close it to generate database tables. You can change the database the app points to in config/database.py. The default database is an sqlite database: 'db/search_database.sqlite'.
+Next you need to populate the database. To do this you'll need to export a CSV file from the Search Options by Insurance Company excel spreadsheet. After that's done, execute the population script:
 ```bash
-$ python server.py
-```
-
-**WARNING: database population is currently under change. The below script will ONLY work for SQLite databases.**
-
-Next you need to populate the database. To do this you'll need to export a CSV file from the Search Options by Insurance Company excel spreadsheet. After that's done, use scripts/build_db.py to build the database.
-```bash
-$ cd scripts
-$ python build_db.py <path-to-csv-file> ../db/search_database.sqlite
-$ cd ..
+$ python bin/populate_database.py <path-to-csv-file>
 ```
 
 After that, start the api server. The default host and port are 0.0.0.0 and 5000 - you can specify different ones using the -s and -p options. If the environment has a PORT env variable set, that will be the default if none is specified by the user.
@@ -51,14 +43,18 @@ Updating the Database
 ---------------------
 Currently no proper way of doing this is included; for the time being, the only other option is to rebuild the database and then replace the old with the new. Don't re-write onto the old database, as you'll end up with dupicated copies of everything.
 
+Configuration
+-------------
+...(for the moment, look in config/*.py)
+
 Bundled Scripts
 ---------------
-**scripts/build_db.py**
+**bin/populate_database.py**
 
-Takes an excel-generated CSV file of the insurance companies and uses it to populate an SQLite database.
+Takes an excel-generated CSV file of the insurance companies and uses it to populate the database specified in the config.
 
 Usage:
 ```bash
 $ cd scripts
-$ python build_db.py <input_csv_file> <sqlite_db_file>
+$ python build_db.py <input_csv_file>
 ```
