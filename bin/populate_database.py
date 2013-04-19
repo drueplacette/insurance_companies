@@ -19,22 +19,36 @@ def main(csv_filepath):
     '''Iterate over lines of a CSV, parsing records and insterting them into a database'''
     engine = create_engine(database_URI, echo=False)
     Base.metadata.create_all(engine) # Create tables if they don't exist
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    conn = engine.connect()
+    transaction = conn.begin()
+
+    company_table = Company.__table__
+    search_option_table = SearchOption.__table__
 
     for row, record in enumerate(csv_parselines(csv_filepath)):
         clear_line()
         print(row, 'rows inserted...', end=' ')
-        company = Company(record['name'], record['payer_id'])
-        session.add(company)
-        session.commit() # Commits the company record to the db,
-                         # and more importantly, updates the company object with its new id
-        for option in record['search_options']:
-            search_option = SearchOption(company.id, *option)
-            session.add(search_option)
-        session.commit()
+        company = company_table.insert().values(name=record['name'], payer_id=record['payer_id'])
+        key = conn.execute(company) # Need this for associating the
+                                    # search options with the company
 
-    print 'done'
+        for option in record['search_options']:
+            if len(option) < 7:
+                option += ['']*(7-len(option)) # pad out empty fields
+
+            # Unfortunately, this is quite dirty due to the schema...
+            # Fully normalising the schema would make this look better,
+            # but require more models to be made, wouldn't be
+            # very efficient in terms of data.
+            search_option = search_option_table.insert().values(
+                                company_id=key.lastrowid, option_number=option[0],
+                                field1=option[1], field2=option[2], field3=option[3],
+                                field4=option[4], field5=option[5], field6=option[6])
+            conn.execute(search_option)
+                
+    print('commiting')
+    transaction.commit()
+    print('done')
 
 def csv_parselines(csv_filepath):
     '''Yield parsed CSV lines one at a time'''

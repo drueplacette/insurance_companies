@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Sequence
 from sqlalchemy.orm import relationship, backref
 from .Base import Base
 
